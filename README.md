@@ -50,3 +50,8 @@ Based on these, it calculates:
 * HTML
 * CSS
 * JavaScript
+
+Output:
+
+<img width="655" height="721" alt="password-strength-analyzer" src="https://github.com/user-attachments/assets/84fa7f76-42cf-49c6-8e98-8b3783839f84" />
+

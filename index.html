@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SecurePass Pro | Real-World Password Analysis</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap");
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1e1e2f, #252542);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      text-align: center;
+      color: #00f5a0;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2rem;
+      border-radius: 20px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(12px);
+      transition: all 0.3s ease-in-out;
+    }
+
+    .container:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 40px rgba(0, 245, 160, 0.2);
+    }
+
+    label {
+      font-size: 1rem;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      margin-bottom: 1rem;
+      transition: background 0.3s;
+    }
+
+    input:focus {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .strength-bar {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .meter-fill {
+      height: 10px;
+      width: 0%;
+      background: linear-gradient(90deg, #ff4b2b, #ff416c);
+      transition: width 0.6s ease-in-out, background-color 0.4s ease;
+      border-radius: 10px;
+    }
+
+    .results {
+      margin-top: 1.5rem;
+    }
+
+    .result-item {
+      margin-bottom: 0.8rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+    }
+
+    .result-item strong {
+      color: #00f5a0;
+    }
+
+    .suggestions {
+      margin-top: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1rem;
+      border-radius: 10px;
+    }
+
+    .suggestions h3 {
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+      color: #00f5a0;
+    }
+
+    .suggestions ul {
+      list-style-type: disc;
+      padding-left: 1.2rem;
+      font-size: 0.9rem;
+      color: #ddd;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🔒 Password Strength Analyzer</h1>
+  <div class="container">
+    <label for="password">Enter Your Password:</label>
+    <input type="password" id="password" placeholder="Type your password..." />
+    <div class="strength-bar">
+      <div class="meter-fill" id="meter"></div>
+    </div>
+
+    <div class="results">
+      <div class="result-item"><strong>Strength:</strong> <span id="strength">N/A</span></div>
+      <div class="result-item"><strong>Hack Probability:</strong> <span id="probability">0%</span></div>
+      <div class="result-item"><strong>Estimated Crack Time:</strong> <span id="time">N/A</span></div>
+      <div class="result-item"><strong>Entropy:</strong> <span id="entropy">0 bits</span></div>
+      <div class="result-item"><strong>Possible Combinations:</strong> <span id="combinations">0</span></div>
+    </div>
+
+    <div class="suggestions">
+      <h3>Suggestions:</h3>
+      <ul id="suggestions-list">
+        <li>Use at least 12 characters.</li>
+        <li>Mix uppercase, lowercase, numbers, and symbols.</li>
+        <li>Avoid common words and personal info.</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const passwordInput = document.getElementById("password");
+    const meter = document.getElementById("meter");
+    const strengthText = document.getElementById("strength");
+    const probabilityText = document.getElementById("probability");
+    const timeText = document.getElementById("time");
+    const entropyText = document.getElementById("entropy");
+    const combinationsText = document.getElementById("combinations");
+    const suggestionsList = document.getElementById("suggestions-list");
+
+    passwordInput.addEventListener("input", () => {
+      const password = passwordInput.value;
+      analyzePassword(password);
+    });
+
+    function analyzePassword(password) {
+      let score = 0;
+      let suggestions = [];
+
+      const length = password.length;
+      const hasLower = /[a-z]/.test(password);
+      const hasUpper = /[A-Z]/.test(password);
+      const hasNumber = /[0-9]/.test(password);
+      const hasSymbol = /[^A-Za-z0-9]/.test(password);
+
+      if (length >= 8) score += 1;
+      if (length >= 12) score += 1;
+      if (hasLower) score += 1;
+      if (hasUpper) score += 1;
+      if (hasNumber) score += 1;
+      if (hasSymbol) score += 1;
+
+      let entropy = (Math.log2(getCharsetSize(password)) * length).toFixed(2);
+      let combinations = Math.pow(getCharsetSize(password), length);
+
+      let crackTime = calculateCrackTime(combinations);
+      let probability = Math.min(100, (7 - score) * 14.2).toFixed(1);
+
+      let strengthLevels = ["Very Weak", "Weak", "Moderate", "Strong", "Very Strong"];
+      let colorLevels = ["#ff4b2b", "#ff7300", "#ffc400", "#00f5a0", "#00ff88"];
+      let level = Math.min(Math.floor(score / 1.2), 4);
+
+      meter.style.width = `${(score / 6) * 100}%`;
+      meter.style.background = colorLevels[level];
+      strengthText.textContent = strengthLevels[level];
+      probabilityText.textContent = `${probability}% chance of being hacked`;
+      timeText.textContent = crackTime;
+      entropyText.textContent = `${entropy} bits`;
+      combinationsText.textContent = formatLargeNumber(combinations);
+
+      suggestions = generateSuggestions(password);
+      displaySuggestions(suggestions);
+    }
+
+    function getCharsetSize(password) {
+      let size = 0;
+      if (/[a-z]/.test(password)) size += 26;
+      if (/[A-Z]/.test(password)) size += 26;
+      if (/[0-9]/.test(password)) size += 10;
+      if (/[^A-Za-z0-9]/.test(password)) size += 32;
+      return size;
+    }
+
+    function calculateCrackTime(combinations) {
+      const guessesPerSecond = 1e9;
+      const seconds = combinations / guessesPerSecond;
+
+      if (seconds < 60) return `${seconds.toFixed(2)} seconds`;
+      const minutes = seconds / 60;
+      if (minutes < 60) return `${minutes.toFixed(2)} minutes`;
+      const hours = minutes / 60;
+      if (hours < 24) return `${hours.toFixed(2)} hours`;
+      const days = hours / 24;
+      if (days < 365) return `${days.toFixed(2)} days`;
+      const years = days / 365;
+      return `${years.toFixed(2)} years`;
+    }
+
+    function generateSuggestions(password) {
+      let suggestions = [];
+      if (password.length < 8) suggestions.push("Increase password length beyond 8 characters.");
+      if (!/[A-Z]/.test(password)) suggestions.push("Add uppercase letters.");
+      if (!/[a-z]/.test(password)) suggestions.push("Add lowercase letters.");
+      if (!/[0-9]/.test(password)) suggestions.push("Include some numbers.");
+      if (!/[^A-Za-z0-9]/.test(password)) suggestions.push("Add special characters like @, #, $, %.");
+      if (/123|password|qwerty|admin/i.test(password)) suggestions.push("Avoid common patterns or words.");
+      return suggestions;
+    }
+
+    function displaySuggestions(suggestions) {
+      suggestionsList.innerHTML = "";
+      if (suggestions.length === 0) {
+        suggestionsList.innerHTML = "<li>Great password! It’s secure.</li>";
+      } else {
+        suggestions.forEach((s) => {
+          const li = document.createElement("li");
+          li.textContent = s;
+          suggestionsList.appendChild(li);
+        });
+      }
+    }
+
+    // ✅ Helper: Format large numbers into readable form
+    function formatLargeNumber(num) {
+      if (!isFinite(num)) return "∞";
+
+      const units = ["", "K", "M", "B", "T", "Q"];
+      let unitIndex = 0;
+
+      while (num >= 1000 && unitIndex < units.length - 1) {
+        num /= 1000;
+        unitIndex++;
+      }
+
+      return num.toFixed(2).replace(/\.00$/, "") + " " + units[unitIndex];
+    }
+  </script>
+</body>
+</html>

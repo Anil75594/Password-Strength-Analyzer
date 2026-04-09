@@ -1,8 +1,8 @@
-# 🔒 Password Strength Analyzer
+# Password Strength Analyzer
 
 A simple and interactive Password Strength Analyzer that evaluates the security of a password in real-time.
 
-## 🚀 Features
+## Features
 
 * Real-time password input analysis
 * Strength indicator
@@ -12,7 +12,7 @@ A simple and interactive Password Strength Analyzer that evaluates the security 
 * Possible combinations count
 * Suggestions for improving password strength
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 password-strength-analyzer
@@ -21,7 +21,7 @@ password-strength-analyzer
 └── script.js
 ```
 
-## ⚙️ How It Works
+## How It Works
 
 The analyzer checks:
 
@@ -39,13 +39,13 @@ Based on these, it calculates:
 * Entropy
 * Possible combinations
 
-## 💡 Suggestions
+## Suggestions
 
 * Use at least 12 characters
 * Mix uppercase, lowercase, numbers, and symbols
 * Avoid common words and personal information
 
-## 🛠️ Technologies Used
+## Technologies Used
 
 * HTML
 * CSS
